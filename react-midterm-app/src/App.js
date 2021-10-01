@@ -1,23 +1,23 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+
+import CourseList from './components/CourseList';
+import CourseCreate from './components/CourseCreate';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
           This is my midterm project!!!!!
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
+      <p>
+        Your Courses
+      </p>
+      <CourseCreate />
+      <CourseList />
     </div>
   );
 }
