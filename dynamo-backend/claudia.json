@@ -1,0 +1,11 @@
+{
+  "lambda": {
+    "role": "dynamo-backend-executor",
+    "name": "dynamo-backend",
+    "region": "us-west-1"
+  },
+  "api": {
+    "id": "pz5io3cov8",
+    "module": "index"
+  }
+}
