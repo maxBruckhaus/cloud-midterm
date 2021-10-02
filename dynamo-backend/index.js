@@ -16,32 +16,50 @@ api.post('/semesters', function (request) {
 }, { success: 201 }); // returns HTTP status 201 - Created if successful
 
 // Create new course
-api.post('/courses', function (request) {
-  var params = {  
-    TableName: 'courses',  
-    Item: {
-      course_name: request.body.course_name,
-      course_difficulty: request.body.course_difficulty,
-      course_enjoy: request.body.course_enjoy
-    } 
+api.post('/courses', async function (request) {
+  try {
+    var params = {  
+      TableName: 'courses',  
+      Item: {
+        course_name: request.body.course_name,
+        course_difficulty: request.body.course_difficulty,
+        course_enjoy: request.body.course_enjoy
+      } 
+    }
+    const response = await dynamoDb.put(params).promise()
+    .then(response => response)
+    .catch(function () {
+      console.log("Promise rejected");
+    });
+    return response;
   }
-  return dynamoDb.put(params).promise(); // returns dynamo result 
+  catch(err) {
+    console.log("Error: " + err);
+  }
 }, { success: 201 }); // returns HTTP status 201 - Created if successful
 
 // Get all semesters
-api.get('/semesters', function (request) {
-  return dynamoDb.scan({ TableName: 'semesters' }).promise()
-    .then(response => response.Items)
+api.get('/semesters', async function (request) {
+  const response = await dynamoDb.scan({ TableName: 'semesters' }).promise()
+  .then(response => response.Items)
+  .catch(function () {
+    console.log("Promise rejected");
+  });
+  return response;
 });
 
 // Get all courses
-api.get('/courses', function (request) {
-  return dynamoDb.scan({ TableName: 'courses' }).promise()
-    .then(response => response.Items)
+api.get('/courses', async function (request) {
+  const response = await dynamoDb.scan({ TableName: 'courses' }).promise()
+  .then(response => response.Items)
+  .catch(function () {
+    console.log("Promise rejected");
+  });
+  return response;
 });
 
 // Delete a course
-api.delete('/courses/{courseName}', function (request) {
+api.delete('/courses/{courseName}', async function (request) {
   var courseName = request.pathParams.courseName;
   console.log(courseName);
   var params = {
@@ -50,12 +68,17 @@ api.delete('/courses/{courseName}', function (request) {
       "course_name": courseName
     }
   };
-  return dynamoDb.delete(params).promise();
+  const response = await dynamoDb.delete(params).promise()
+  .then(response => response)
+  .catch(function () {
+    console.log("Promise rejected");
+  });
+  return response;
 }, { success: 200 });
 
 
 // Update a course
-api.put('/courses/{courseName}', function (request) {
+api.put('/courses/{courseName}', async function (request) {
   var courseName = request.pathParams.courseName;
   var courseDifficulty = parseInt(request.body.course_difficulty);
   console.log(courseName);
@@ -71,7 +94,12 @@ api.put('/courses/{courseName}', function (request) {
       ":newVal": courseDifficulty
     },
   };
-  return dynamoDb.update(params).promise();
+  const response = await dynamoDb.update(params).promise()
+  .then(response => response)
+  .catch(function () {
+    console.log("Promise rejected");
+  });
+  return response;
 }, { success: 200 });
 
 module.exports = api;

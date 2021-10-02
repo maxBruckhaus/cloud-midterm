@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react'
+import React, { Component } from 'react'
 import axios from 'axios'
 
 import CourseList from './components/CourseList';
@@ -13,11 +13,7 @@ function App() {
           This is my midterm project!!!!!
         </p>
       </header>
-      <p>
-        Your Courses
-      </p>
       <CourseCreate />
-      <CourseList />
     </div>
   );
 }
