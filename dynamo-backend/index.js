@@ -3,16 +3,38 @@ const ApiBuilder = require('claudia-api-builder'),
 var api = new ApiBuilder(),
     dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-// Create new semester
-api.post('/semesters', function (request) {
-  var params = {  
-    TableName: 'semesters',  
-    Item: {
-        semester_id: request.body.semester_id,
-        semester_name: request.body.semester_name
-    } 
+// Pre-populate courses
+api.post('/courses/populate', async function (request) {
+  try {
+
+    for (var i = 30; i < 50; i++) {
+      var randomName = i.toString();
+      var difficulty = 100;
+      var enjoy = false;
+      console.log("PARAMSSSSSSS");
+      console.log(randomName);
+      console.log(difficulty);
+      console.log(enjoy);
+
+      var params = {  
+        TableName: 'courses',  
+        Item: {
+          course_name: randomName,
+          course_difficulty: difficulty,
+          course_enjoy: enjoy
+        } 
+      }
+      const response = await dynamoDb.put(params).promise()
+      .then(response => response)
+      .catch(function () {
+        console.log("Promise rejected");
+      });
+    }
+    return response;
   }
-  return dynamoDb.put(params).promise(); // returns dynamo result 
+  catch(err) {
+    console.log("Error: " + err);
+  }
 }, { success: 201 }); // returns HTTP status 201 - Created if successful
 
 // Create new course
@@ -38,15 +60,6 @@ api.post('/courses', async function (request) {
   }
 }, { success: 201 }); // returns HTTP status 201 - Created if successful
 
-// Get all semesters
-api.get('/semesters', async function (request) {
-  const response = await dynamoDb.scan({ TableName: 'semesters' }).promise()
-  .then(response => response.Items)
-  .catch(function () {
-    console.log("Promise rejected");
-  });
-  return response;
-});
 
 // Get all courses
 api.get('/courses', async function (request) {

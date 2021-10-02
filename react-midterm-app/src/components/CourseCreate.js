@@ -12,6 +12,10 @@ export default () => {
     const [enjoy, setEnjoy] = useState(true);
     const [newDifficulty, setNewDifficulty] = useState(0);
 
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [coursesPerPage, setCoursesPerPage] = useState(5);
+
     useEffect(() => {
         getSession().then(() => {
             setLoggedIn(true);
@@ -19,15 +23,22 @@ export default () => {
     }, []);
 
     useEffect(() => {
-        axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses')
-        .then(res => {
-            console.log(res)
-            setCourses(res.data)
-        })
-        .catch(err => {
-            console.log(err)
-        })
-    }, [])
+        const fetchPosts = async () => {
+            setLoading(true);
+            const res = await axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses')
+            .then(res => {
+                console.log(res);
+                setCourses(res.data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
+
+        fetchPosts();
+        console.log(courses);
+    }, []);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -93,6 +104,23 @@ export default () => {
         });
     }
 
+    // Get current posts
+    const indexOfLastCourse = currentPage * coursesPerPage;
+    const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+    const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+
+    const pageNumbers = [];
+    const totalCourses = courses.length;
+
+    for (let i = 1; i <= Math.ceil(totalCourses / coursesPerPage); i++) {
+        pageNumbers.push(i);
+    }
+
+    // Change page
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    }
+
     return (loggedIn && 
         <Fragment>
             <h1>Add A Course</h1>
@@ -106,12 +134,20 @@ export default () => {
             </form>
 
             <h1>Your Courses</h1>
-            {courses.map(course => 
+            {currentCourses.map(course => 
             <h3>Name: {course.course_name} Difficulty: {course.course_difficulty}Enjoy: {(course.course_enjoy).toString()}
                 <form><label>New Difficulty</label><input type="number" name="newDifficulty" onChange={e => setNewDifficulty(e.target.value)} /></form>
                 <button onClick={() => updateCourse(course.course_name)}>Update Difficulty</button>
                 <button onClick={() => deleteCourse(course.course_name)}>Delete</button>
             </h3>)}
+
+            {pageNumbers.map(number => (
+                <li key={number}>
+                    <a onClick={() => paginate(number)}>
+                        {number}
+                    </a>
+                </li>
+            ))}
         </Fragment>
     );
 }

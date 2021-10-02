@@ -7,7 +7,6 @@ import Status from "./components/Status";
 
 import axios from 'axios'
 
-import CourseList from './components/CourseList';
 import CourseCreate from './components/CourseCreate';
 
 function App() {
