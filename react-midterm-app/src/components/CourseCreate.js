@@ -3,11 +3,20 @@ import { Account, AccountContext } from "./Account";
 import axios from 'axios';
 
 export default () => {
+    const { getSession } = useContext(AccountContext);
+    const [loggedIn, setLoggedIn] = useState(false);
+
     const [courses, setCourses] = useState([]);
     const [course_name, setName] = useState("");
     const [difficulty, setDifficulty] = useState("");
     const [enjoy, setEnjoy] = useState(true);
     const [newDifficulty, setNewDifficulty] = useState(0);
+
+    useEffect(() => {
+        getSession().then(() => {
+            setLoggedIn(true);
+        });
+    }, []);
 
     useEffect(() => {
         axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses')
@@ -84,7 +93,7 @@ export default () => {
         });
     }
 
-    return (
+    return (loggedIn && 
         <Fragment>
             <h1>Add A Course</h1>
             <form onSubmit={handleSubmit}>

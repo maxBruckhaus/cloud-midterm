@@ -1,5 +1,10 @@
 import './App.css';
-import React, { Component } from 'react'
+import React, { Component, Fragment, useState } from 'react';
+import Signup from "./components/SignUp";
+import Login from "./components/Login";
+import { Account } from "./components/Account";
+import Status from "./components/Status";
+
 import axios from 'axios'
 
 import CourseList from './components/CourseList';
@@ -7,15 +12,13 @@ import CourseCreate from './components/CourseCreate';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          This is my midterm project!!!!!
-        </p>
-      </header>
-      <CourseCreate />
-    </div>
+    <Account>
+        <Status />
+        <Signup />
+        <Login />
+        <CourseCreate />
+    </Account>
   );
-}
+};
 
 export default App;
