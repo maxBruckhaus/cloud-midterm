@@ -1,22 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import UserPool from "../UserPool";
+import { Account, AccountContext } from "./Account";
+
 
 const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+    const { getSession } = useContext(AccountContext);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-  const onSubmit = (event) => {
-    event.preventDefault();
+    useEffect(() => {
+        getSession().then(() => {
+            setLoggedIn(true);
+        });
+    }, []);
 
-    UserPool.signUp(email, password, [], null, (err, data) => {
-      if (err) {
-        console.error(err);
-      }
-      console.log(data);
-    });
-  };
+    const onSubmit = (event) => {
+        event.preventDefault();
 
-  return (
+        UserPool.signUp(email, password, [], null, (err, data) => {
+            if (err) {
+                console.error(err);
+            }
+            console.log(data);
+        });
+    };
+
+  return (!loggedIn &&
     <div>
       <form onSubmit={onSubmit}>
         <label htmlFor="email">Email</label>
