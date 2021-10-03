@@ -65,14 +65,38 @@ api.post('/courses', async function (request) {
 api.get('/courses', async function (request) {
   const response = await dynamoDb.scan({ TableName: 'courses' }).promise()
   .then(response => response.Items)
-  .catch(function () {
-    console.log("Promise rejected");
+  .catch(function (err) {
+    console.log("Promise rejected: " + err);
   });
+
   return response;
 });
 
+// Get paginated courses
+api.get('/courses/paginate/{page}/{limit}', async function (request) {
+  const page = request.pathParams.page;
+  const limit = request.pathParams.limit;
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  var slicedResponse = [];
+
+  const response = await dynamoDb.scan({ TableName: 'courses' }).promise()
+  .then(response => {
+    console.log("ALL ITEMS: " + response.Items);
+    slicedResponse = response.Items.slice(startIndex, endIndex);
+    console.log("5 ITEMS: " + slicedResponse);
+  })
+  .catch(function (err) {
+    console.log("Promise rejected: " + err);
+  });
+
+  return slicedResponse;
+});
+
 // Delete a course
-api.delete('/courses/{courseName}', async function (request) {
+api.delete('/courses/delete/{courseName}', async function (request) {
   var courseName = request.pathParams.courseName;
   console.log(courseName);
   var params = {
@@ -83,8 +107,8 @@ api.delete('/courses/{courseName}', async function (request) {
   };
   const response = await dynamoDb.delete(params).promise()
   .then(response => response)
-  .catch(function () {
-    console.log("Promise rejected");
+  .catch(function (err) {
+    console.log("Promise rejected: " + err);
   });
   return response;
 }, { success: 200 });

@@ -6,13 +6,15 @@ export default () => {
     const { getSession } = useContext(AccountContext);
     const [loggedIn, setLoggedIn] = useState(false);
 
+    const [allCourses, setAllCourses] = useState([]);
+
     const [courses, setCourses] = useState([]);
     const [course_name, setName] = useState("");
+
     const [difficulty, setDifficulty] = useState("");
     const [enjoy, setEnjoy] = useState(true);
     const [newDifficulty, setNewDifficulty] = useState(0);
 
-    const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [coursesPerPage, setCoursesPerPage] = useState(5);
 
@@ -22,23 +24,47 @@ export default () => {
         });
     }, []);
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true);
-            const res = await axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses')
+    useEffect( async => {
+        const fetchAllCourses = async () => {
+            var url = 'https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses';
+            const res = await axios.get(url)
             .then(res => {
                 console.log(res);
-                setCourses(res.data);
-                setLoading(false);
+                setAllCourses(res.data);
             })
             .catch(err => {
                 console.log(err);
             })
         }
-
-        fetchPosts();
-        console.log(courses);
+        fetchAllCourses();
     }, []);
+
+    useEffect( async => {
+        const fetchFirstCourses = async () => {
+            var url = 'https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses/paginate/';
+            const res = await axios.get(url + currentPage + "/" + coursesPerPage)
+            .then(res => {
+                console.log(res);
+                setCourses(res.data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
+        fetchFirstCourses();
+    }, []);
+
+    const fetchCourses = async (page, limit) => {
+        var url = 'https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses/paginate/';
+        const res = await axios.get(url + page + "/" + limit)
+        .then(res => {
+            console.log(res);
+            setCourses(res.data);
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -59,29 +85,22 @@ export default () => {
         .then(res => {
             console.log(res)
             console.log(res.data)
-            axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses').then(res => {
-                console.log(res)
-                setCourses(res.data)
-            })
+            fetchCourses(currentPage, coursesPerPage);
         });
     };
 
     const deleteCourse = (courseName) => {
         console.log("DELETING~!!!!!!" + courseName);
-        var url = 'https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses/' + courseName;
+        var url = 'https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses/delete/' + courseName;
         console.log(url);
         axios.delete(url)
         .then(res => {
             console.log(res);
-            axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses').then(res => {
-                console.log(res);
-                setCourses(res.data)
-            })
+            fetchCourses(currentPage, coursesPerPage);
         });
     }
 
     const updateCourse = (courseName) => {
-
         var course_difficulty = parseInt(newDifficulty);
 
         const updateDifficulty = {
@@ -97,28 +116,45 @@ export default () => {
         axios.put(url, jsonDifficulty, {headers:{"Content-Type" : "application/json"}})
         .then(res => {
             console.log(res);
-            axios.get('https://z2rmhdl2ab.execute-api.us-west-1.amazonaws.com/latest/courses').then(res => {
-                console.log(res);
-                setCourses(res.data);
-            })
+            fetchCourses(currentPage, coursesPerPage);
         });
     }
 
-    // Get current posts
-    const indexOfLastCourse = currentPage * coursesPerPage;
-    const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
-    const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+    // Previous page
+    const paginatePrevious = () => {
+        const courseCount = allCourses.length;
+        console.log("total course count " + courseCount);
 
-    const pageNumbers = [];
-    const totalCourses = courses.length;
+        console.log("PAGE NUMBER: " + currentPage);
+        const proposedPage = currentPage - 1;
+        console.log("PROPOSED PAGE: " + proposedPage);
 
-    for (let i = 1; i <= Math.ceil(totalCourses / coursesPerPage); i++) {
-        pageNumbers.push(i);
+        if (proposedPage >= 1) {
+            console.log("WENT BACK A PAGEEEEEEEEE: " + currentPage);
+            fetchCourses(currentPage - 1, coursesPerPage);
+            setCurrentPage(proposedPage);
+        }
+        console.log("NEW PAGE NUMBER: " + currentPage);
     }
 
-    // Change page
-    const paginate = (pageNumber) => {
-        setCurrentPage(pageNumber);
+    // Next page
+    const paginateNext = () => {
+        const courseCount = allCourses.length;
+        console.log("total course count " + courseCount);
+
+        const maxPages = Math.ceil(courseCount / coursesPerPage);
+        console.log("MAX PAGES: " + maxPages);
+
+        console.log("PAGE NUMBER: " + currentPage);
+        const proposedPage = currentPage + 1;
+        console.log("PROPOSED PAGE: " + proposedPage);
+
+        if (proposedPage <= maxPages) {
+            console.log("ADDED A PAGEEEEEEEEE: " + currentPage);
+            fetchCourses(currentPage + 1, coursesPerPage);
+            setCurrentPage(proposedPage);
+        }
+        console.log("NEW PAGE NUMBER: " + currentPage);
     }
 
     return (loggedIn && 
@@ -134,20 +170,16 @@ export default () => {
             </form>
 
             <h1>Your Courses</h1>
-            {currentCourses.map(course => 
+            {courses.map(course => 
             <h3>Name: {course.course_name} Difficulty: {course.course_difficulty}Enjoy: {(course.course_enjoy).toString()}
                 <form><label>New Difficulty</label><input type="number" name="newDifficulty" onChange={e => setNewDifficulty(e.target.value)} /></form>
                 <button onClick={() => updateCourse(course.course_name)}>Update Difficulty</button>
                 <button onClick={() => deleteCourse(course.course_name)}>Delete</button>
             </h3>)}
 
-            {pageNumbers.map(number => (
-                <li key={number}>
-                    <a onClick={() => paginate(number)}>
-                        {number}
-                    </a>
-                </li>
-            ))}
+            <button onClick={() => paginatePrevious()}>Previous Page</button>
+            <button onClick={() => paginateNext()}>Next Page</button>
+
         </Fragment>
     );
 }
