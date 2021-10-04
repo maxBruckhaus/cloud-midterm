@@ -164,14 +164,14 @@ export default () => {
                 <label>
                     <label>Name</label><input type="text" name="name" onChange={e => setName(e.target.value)} />
                     <label>Difficulty</label><input type="number" name="difficulty" onChange={e => setDifficulty(e.target.value)} />
-                    <label>Enjoy</label><input type="checkbox" name="enjoy" onChange={e => setEnjoy(e.target.value)} />
+                    <label>Interesting</label><input type="checkbox" name="enjoy" onChange={e => setEnjoy(e.target.value)} />
                 </label>
                 <button type="submit">Submit</button>
             </form>
 
             <h1>Your Courses</h1>
             {courses.map(course => 
-            <h3>Name: {course.course_name} Difficulty: {course.course_difficulty}Enjoy: {(course.course_enjoy).toString()}
+            <h3>Name: {course.course_name}, Difficulty: {course.course_difficulty}, Interesting: {(course.course_enjoy).toString()}
                 <form><label>New Difficulty</label><input type="number" name="newDifficulty" onChange={e => setNewDifficulty(e.target.value)} /></form>
                 <button onClick={() => updateCourse(course.course_name)}>Update Difficulty</button>
                 <button onClick={() => deleteCourse(course.course_name)}>Delete</button>
