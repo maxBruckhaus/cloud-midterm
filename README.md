@@ -1,2 +1,7 @@
 # cloud-midterm
-SPA
+SPA Course Tracker
+Allows you to keep track and manage courses you have taken. Users can create courses, modify course difficulty, and delete a course.
+React application built with React using "npx create-react-app midterm-app". 
+API built with Claudia js using "npm install aws-sdk claudia-api-builder -S". 
+Use Postman to invoke lambda functions testing the backend.
+Create Cloudfront invalidations to test UI on the frontend.
